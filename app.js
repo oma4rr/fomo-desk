@@ -1,4 +1,4 @@
-/* Grok Bot desk app · STEP 10 (hosting plan B: read-only files through the tunnel, writes go to Telegram in STEP 11).
+/* Grok Bot desk app · STEP 10 (hosting plan B: read-only files through the tunnel, writes go through Telegram).
    Never a made-up number: a value the desk does not have shows "—" or an empty state. The data key arrives once in
    the #d= fragment, is kept in localStorage, removed from the address bar and never logged or shown. */
 (function () {
@@ -7,7 +7,7 @@
   const BOTS = ["scanner", "analyst", "brain", "executor", "risk"];
   const NAMES = { scanner: "Scanner", analyst: "Analyst", brain: "Brain", executor: "Executor", risk: "Risk" };
   const COLORS = { scanner: "#64d2ff", analyst: "#ffd60a", brain: "#bf5af2", executor: "#00d35a", risk: "#ff6b9a" };
-  const PLAN_B = "Plan B: the app is read-only. This runs from Telegram once STEP 11 connects it.";
+  const PLAN_B = "Plan B: the app is read-only. Do this from Telegram (send the command to the desk bot).";
   const $ = (s, el) => (el || document).querySelector(s);
   const $$ = (s, el) => Array.from((el || document).querySelectorAll(s));
   const reduce = () => window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -323,7 +323,7 @@
           <i class="bdot" style="width:8px;height:8px;border-radius:50%;background:${dotc}"></i><span style="color:${c}">${NAMES[n]}</span>
           <span class="ter" style="font-weight:400;font-size:13px">${esc(statusText(b))} · ${esc(b.label || "—")}</span>
           <span style="margin-left:auto" class="switch ${paused ? "" : "on"}" role="switch" aria-checked="${!paused}" aria-disabled="true" title="${lock ? "Locked while a position is open" : esc(PLAN_B)}"></span></div>
-        <div class="lock" style="margin-top:6px">${lock ? "Pause locked: a position is open" : "Pause from Telegram (STEP 11) · plan B"}</div>
+        <div class="lock" style="margin-top:6px">${lock ? "Pause locked: a position is open" : "Pause from Telegram: pause " + NAMES[n] + " · plan B"}</div>
         <div style="margin-top:8px">${botBody(b, true)}</div>
         <div class="sub" style="font-size:13px;margin:12px 0 4px">Last 20 decisions</div>
         ${rows == null ? sk(120) : rows.length ? '<div class="rows" style="background:#2c2c2e">' + rows.map(x => decisionRow(n, x)).join("") + "</div>" : '<div class="emptybox" style="padding:16px">Nothing yet tonight</div>'}
@@ -415,15 +415,15 @@
     const push = a.pushes || {};
     return `<div class="title">Account</div>
       <div class="seg" title="${esc(PLAN_B)}"><button class="${a.mode === "PAPER" ? "on" : ""}" disabled>PAPER</button><button class="${a.mode === "LIVE" ? "on" : ""}" disabled>LIVE</button></div>
-      <div class="note">LIVE needs you to type LIVE. Plan B: switch from Telegram (STEP 11). PAPER until you decide.</div>
+      <div class="note">LIVE needs you to type LIVE. Plan B: switch from Telegram. PAPER until you decide.</div>
       <div class="rows" style="margin-top:14px"><div class="row"><span class="mid"><div class="t">Paper cash</div><div class="s">read-only in plan B</div></span><span class="r">${money(a.paperCash)}</span></div>
         ${prof ? `<a class="row" href="${esc(prof)}" target="_blank" rel="noopener noreferrer"><span class="mid"><div class="t">Your FOMO profile</div><div class="s">@${esc(a.handle || "")}</div></span><span class="r ter">›</span></a>` : ""}
         ${inv ? `<button class="row" data-act="invite" data-url="${esc(inv)}"><span class="mid"><div class="t">Invite a friend</div><div class="s">Share your FOMO link</div></span><span class="r ter">›</span></button>` : ""}</div>
       ${Object.keys(groups).map(g => `<div class="h2" id="g-${esc(g)}"><span>${esc(NAMES[g] || g[0].toUpperCase() + g.slice(1))}</span></div><div class="rows">${Object.keys(groups[g]).map(k => setRow(k, groups[g][k])).join("")}</div>`).join("")}
       <div class="h2"><span>Copy picks</span></div><div class="seg" title="${esc(PLAN_B)}">${["Off", "24h", "12h", "6h"].map(x => '<button disabled class="' + ((a.copyPicks || "off").toLowerCase() === x.toLowerCase() || (x === "Off" && !a.copyPicks) ? "on" : "") + '">' + x + "</button>").join("")}</div>
       <div class="h2"><span>Pushes</span></div>
-      <div class="rows"><div class="row"><span class="mid"><div class="t">${esc(push.label || "Telegram only · not connected yet (STEP 11)")}</div><div class="s">Web push: plan B is Telegram only</div></span><span class="r ter">${push.connected ? "Connected" : "Not connected"}</span></div>
-        <button class="row" disabled style="opacity:.45"><span class="mid"><div class="t">Send test push</div><div class="s">After Telegram is connected (STEP 11)</div></span></button>
+      <div class="rows"><div class="row"><span class="mid"><div class="t">${esc(push.label || "Telegram only · not connected")}</div><div class="s">Web push: plan B is Telegram only</div></span><span class="r ${push.connected ? "up" : "ter"}">${push.connected ? "Connected" : "Not connected"}</span></div>
+        <button class="row" disabled style="opacity:.45"><span class="mid"><div class="t">Send test push</div><div class="s">${push.connected ? "Send test to the desk bot in Telegram" : "After Telegram is connected"}</div></span></button>
         <div class="row"><span class="mid"><div class="t">Watch in Grok Bot</div><div class="s">In the Grok Bot app, open this bot's computer to watch the desk live</div></span></div></div>
       <div class="note" style="margin-top:12px">${esc(PLAN_B)}</div>`;
   }
@@ -492,7 +492,7 @@
     const s = sheet(`<div style="font-weight:600;font-size:17px;margin-bottom:12px">Sell ${esc(symOf(c))}</div>
       <div class="seg" id="pcts">${[25, 50, 100].map(x => '<button data-p="' + x + '" class="' + (x === 100 ? "on" : "") + '">' + x + "%</button>").join("")}</div>
       <button class="btn red" style="width:100%;margin-top:14px" disabled>Confirm sell</button>
-      <div class="note">${watch ? "Watch only: the desk never sells a holding it adopted." : esc(PLAN_B) + " Nothing was sent."}</div>
+      <div class="note">${watch ? "Watch only: the desk never sells a holding it adopted." : "Plan B: the app is read-only. In Telegram send: sell " + esc(symOf(c)) + " 25|50|100. Nothing was sent."}</div>
       <button class="btn" style="width:100%;margin-top:12px" data-close="1">Close</button>`);
     $$("#pcts button", s).forEach(b => b.addEventListener("click", (e) => { e.stopPropagation(); $$("#pcts button", s).forEach(x => x.classList.toggle("on", x === b)); }));
   }
