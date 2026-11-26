@@ -425,14 +425,18 @@
       <div class="rows"><div class="row"><span class="mid"><div class="t">${esc(push.label || "Telegram only · not connected")}</div><div class="s">Web push: plan B is Telegram only</div></span><span class="r ${push.connected ? "up" : "ter"}">${push.connected ? "Connected" : "Not connected"}</span></div>
         <button class="row" disabled style="opacity:.45"><span class="mid"><div class="t">Send test push</div><div class="s">${push.connected ? "Send test to the desk bot in Telegram" : "After Telegram is connected"}</div></span></button>
         <div class="row"><span class="mid"><div class="t">Watch in Grok Bot</div><div class="s">In the Grok Bot app, open this bot's computer to watch the desk live</div></span></div></div>
-      <div class="note" style="margin-top:12px">${esc(PLAN_B)}</div>`;
+      <div class="note" style="margin-top:12px">${esc(PLAN_B)} Settings: send "set stop to -20%" (any setting by name); out of range is refused with the range.</div>`;
   }
+  // read-only in plan B: slider + exact number field, both disabled; default shown when it differs
   function setRow(k, s) {
-    const v = s && typeof s === "object" ? s.value : s;
+    const v = s && typeof s === "object" ? s.value : s, dflt = s && typeof s === "object" ? s.default : null;
     const isNum = typeof v === "number";
     const label = k.replace(/_/g, " ");
-    return `<div class="set"><div class="l"><span>${esc(label)}</span><b class="val">${esc(v == null ? "—" : isNum ? v : String(v))}</b></div>
-      ${isNum && num(s.min) != null && num(s.max) != null ? `<input type="range" disabled min="${s.min}" max="${s.max}" value="${v}" step="any" aria-label="${esc(label)}"/>` : ""}</div>`;
+    const changed = dflt != null && v !== dflt;
+    return `<div class="set"><div class="l"><span>${esc(label)}</span>
+        ${isNum ? `<input class="numf" type="number" disabled value="${v}" aria-label="${esc(label)} exact value"/>` : `<b class="val">${esc(v == null || v === "" ? "not set" : typeof v === "boolean" ? (v ? "on" : "off") : String(v))}</b>`}</div>
+      ${isNum && num(s.min) != null && num(s.max) != null ? `<input type="range" disabled min="${s.min}" max="${s.max}" value="${v}" step="any" aria-label="${esc(label)}"/>
+        <div class="lock">${esc(s.min)} to ${esc(s.max)}${changed ? " · default " + esc(dflt) : ""}</div>` : (changed ? `<div class="lock">default ${esc(String(dflt))}</div>` : "")}</div>`;
   }
 
   // ---------- render ----------

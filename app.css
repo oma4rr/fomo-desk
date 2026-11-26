@@ -146,6 +146,9 @@ a { color: var(--blue); text-decoration: none; }
 .set { padding: 10px 14px; }
 .set + .set { border-top: 0.5px solid var(--sep); }
 .set .l { display: flex; justify-content: space-between; font-size: 14px; }
+.set .numf { width: 96px; height: 32px; border-radius: 8px; border: 0; background: var(--card2); color: var(--text); text-align: right;
+  padding: 0 8px; font: 600 15px var(--txt); font-variant-numeric: tabular-nums; opacity: 1; -webkit-text-fill-color: var(--text); }
+.set .l { align-items: center; }
 .set input[type=range] { width: 100%; accent-color: var(--blue); min-height: 30px; }
 .note { font-size: 13px; color: var(--sec); padding: 8px 2px 0; }
 .lock { font-size: 12px; color: var(--ter); }

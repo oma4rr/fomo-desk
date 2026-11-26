@@ -1,5 +1,5 @@
 /* App shell cache only. Desk data (the tunnel) is never cached: it is cross-origin and is passed straight through. */
-const V = "desk-shell-v10.1";
+const V = "desk-shell-v12.1";
 const SHELL = ["./", "index.html", "app.css", "chart.js", "app.js", "manifest.json", "icons/apple-touch-icon.png"];
 self.addEventListener("install", (e) => { e.waitUntil(caches.open(V).then(c => c.addAll(SHELL)).then(() => self.skipWaiting())); });
 self.addEventListener("activate", (e) => {
